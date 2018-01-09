@@ -40,6 +40,9 @@ const requestLoopContent = (location, callback) => {
 	if (location.indexOf('/-/loop/feed/') != -1) {
 		requestLoopFeed(location, callback);
 	}
+	else {
+		callback('', '');
+	}
 };
 
 exports.requestLoopContent = requestLoopContent;
