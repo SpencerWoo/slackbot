@@ -1,5 +1,4 @@
 const cheerio = require('cheerio');
-const https = require('https');
 const requestLiferayContent = require('./extract_liferay').requestLiferayContent;
 
 const requestGrowContent = (location, callback) => {

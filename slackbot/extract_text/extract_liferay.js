@@ -1,6 +1,7 @@
 const assert = require('assert');
 const cheerio = require('cheerio');
 const CookieManager = require('cookie-manager');
+const http = require('http');
 const https = require('https');
 const querystring = require('querystring');
 const { URL } = require('url');
@@ -40,8 +41,9 @@ const getRequestOptions = (location, method) => {
 
 const authenticate = (location, callback) => {
 	let options = getRequestOptions(location);
+	let agent = options.protocol == 'https:' ? https : http;
 
-	https.request(
+	agent.request(
 		options,
 		(res) => {
 			setCookie(options, res.headers);
@@ -88,7 +90,9 @@ const submitSAMLRequest = (responseBody, callback) => {
 	var options = getRequestOptions(formAction, 'POST');
 	options.headers['content-type'] = 'application/x-www-form-urlencoded';
 
-	var req = https.request(options, (res) => {
+	let agent = options.protocol == 'https:' ? https : http;
+
+	var req = agent.request(options, (res) => {
 		setCookie(options, res.headers);
 
 		if (res.statusCode == 302) {
@@ -128,7 +132,9 @@ const submitLoginForm = (portletId, responseBody, callback) => {
 	var options = getRequestOptions(formAction, 'POST');
 	options.headers['content-type'] = 'application/x-www-form-urlencoded';
 
-	var req = https.request(options, (res) => {
+	let agent = options.protocol == 'https:' ? https : http;
+
+	var req = agent.request(options, (res) => {
 		setCookie(options, res.headers);
 
 		if (res.statusCode == 302) {
@@ -145,8 +151,9 @@ const submitLoginForm = (portletId, responseBody, callback) => {
 
 const followLoginRedirect = (location, callback) => {
 	let options = getRequestOptions(location);
+	let agent = options.protocol == 'https:' ? https : http;
 
-	https.request(
+	agent.request(
 		options,
 		(res) => {
 			if (res.statusCode == 302) {
@@ -189,7 +196,9 @@ const submitSAMLResponse = (responseBody, callback) => {
 	var options = getRequestOptions(formAction, 'POST');
 	options.headers['content-type'] = 'application/x-www-form-urlencoded';
 
-	var req = https.request(options, (res) => {
+	let agent = options.protocol == 'https:' ? https : http;
+
+	var req = agent.request(options, (res) => {
 		setCookie(options, res.headers);
 
 		if (res.statusCode == 302) {
@@ -206,8 +215,9 @@ const submitSAMLResponse = (responseBody, callback) => {
 
 const requestLiferayContent = (location, callback) => {
 	let options = getRequestOptions(location);
+	let agent = options.protocol == 'https:' ? https : http;
 
-	https.request(
+	agent.request(
 		options,
 		(res) => {
 			setCookie(options, res.headers);
