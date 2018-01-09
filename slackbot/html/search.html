@@ -12,7 +12,7 @@
 
 <!-- Moment.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
-<style>.table>tbody>tr>th { padding-top: 2em; }</style>
+<style>.table>tbody>tr>th { padding-top: 2em; } .link-title { font-size: 0.8em; opacity: 0.6; }</style>
 </head>
 
 <body>
@@ -88,7 +88,16 @@ function rebuildTable(e) {
 	};
 
 	var getRowData = function(locationMetadata) {
-		return [locationMetadata['timestamp'], '<a href="' + locationMetadata['location'] + '">' + locationMetadata['location'] + '</a>', locationMetadata['title']];
+		var location = locationMetadata['location'];
+		var title = locationMetadata['title'];
+
+		var locationLink = '<div class="link-location"><a href="' + location + '">' + location + '</a></div>';
+
+		if (location != title) {
+			locationLink += '<div class="link-title">' + title + '</div>'
+		}
+
+		return [locationMetadata['timestamp'], locationLink];
 	};
 
 	var isSelected = function(x) {
