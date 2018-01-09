@@ -1,4 +1,5 @@
 const cheerio = require('cheerio');
+const config = require('../config');
 const requestLiferayContent = require('./extract_liferay').requestLiferayContent;
 
 const requestLoopFeed = (location, callback) => {
@@ -31,11 +32,13 @@ const requestLoopFeed = (location, callback) => {
 }
 
 const requestLoopContent = (location, callback) => {
+	if (!config.extractLiferayContent) {
+		callback('', '');
+		return;
+	}
+
 	if (location.indexOf('/-/loop/feed/') != -1) {
 		requestLoopFeed(location, callback);
-	}
-	else {
-		console.log('Unrecognized Loop URL', location);
 	}
 };
 

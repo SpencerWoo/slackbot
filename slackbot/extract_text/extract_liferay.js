@@ -11,7 +11,7 @@ const config = require('../config');
 assert(config.liferayUsername != null);
 assert(config.liferayPassword != null);
 
-let cm = new CookieManager();
+const cm = new CookieManager();
 
 const setCookie = (options, headers) => {
 	let cookie = headers['set-cookie'];
