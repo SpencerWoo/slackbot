@@ -1,12 +1,12 @@
 const cheerio = require('cheerio');
 const http = require('http');
 const https = require('https');
-const { URL } = require('url');
+const urlParse = require('url').parse;
 
 const getRequestOptions = (location, method) => {
 	console.log(location);
 
-	let url = new URL(location);
+	let url = urlParse(location);
 
 	return {
 		'host': url.host,

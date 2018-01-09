@@ -4,14 +4,14 @@ const CookieManager = require('cookie-manager');
 const http = require('http');
 const https = require('https');
 const querystring = require('querystring');
-const { URL } = require('url');
+const urlParse = require('url').parse;
 
 const config = require('../config');
 
 assert(config.liferayUsername != null);
 assert(config.liferayPassword != null);
 
-let cm = new CookieManager();
+const cm = new CookieManager();
 
 const setCookie = (options, headers) => {
 	let cookie = headers['set-cookie'];
@@ -24,7 +24,7 @@ const setCookie = (options, headers) => {
 const getRequestOptions = (location, method) => {
 	console.log(location);
 
-	let url = new URL(location);
+	let url = urlParse(location);
 
 	var cookie = cm.prepare(location);
 

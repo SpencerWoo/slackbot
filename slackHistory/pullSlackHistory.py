@@ -1,81 +1,83 @@
+#!/usr/bin/env python
+
 import json
 import os
 import re, requests
 
-filepath = os.getcwd() + "\\..\\slackbot\\scripts\\logs"
+filepath = os.path.join(os.getcwd(), "..", "slackbot", "scripts", "logs")
+
+if not os.path.exists(filepath):
+	os.makedirs(filepath)
+
 filename = "links.txt"
 
-# SETUP TOKEN 
+# SETUP TOKEN
 # Bot User OAuth Access Token
 token = os.environ['HUBOT_SLACK_TOKEN']
 
-# SETUP CHANNEL
-channel_id = "" # Give ID or leave empty string and fill out channel_name
-channel_name = "test"
-is_private = True
-
 # CATEGORIES = ["grow.liferay", "web.liferay", "loop.liferay", "stackoverflow", "others", "github"]
-def get_channel_id(channel, method):
-	api_url = 'https://slack.com/api/{c}.{m}?token={t}&pretty=1'.format(c=channel, m=method, t=token)
+def get_channel_ids(channel_type, method, is_private):
+	api_url = 'https://slack.com/api/{c}.{m}?token={t}&pretty=1'.format(c=channel_type, m=method, t=token)
+	print(api_url)
 
 	response = requests.get(api_url)
 	json_data = response.json()
 
-	for group in json_data['groups']:
-		name = group['name']
+	json_data_key = 'groups' if is_private else 'channels'
 
-		if channel_name == name:
-			return group['id']
-
-	# add error handling
+	return [group['id'] for group in json_data[json_data_key]]
 
 def pull_slack_history():
-	global channel_id
-
 	results = {}
-	output = ""
-	
-	channel = "channels"
-	if is_private:
-		channel = "groups"
 
-	if not channel_id:
-		method = "list"
-		channel_id = get_channel_id(channel, method)	
-	
+	for channel_type, is_private in [('channels', False), ('groups', True)]:
+		for channel_id in get_channel_ids(channel_type, 'list', is_private):
+			pull_slack_history_for_channel(channel_type, channel_id, results)
+
+	output = '\n'.join(['%s,%s' % (url, ts) for url, ts in results.items()])
+	write_file(filepath, filename, output)
+
+def pull_slack_history_for_channel(channel_type, channel_id, results):
 	# add error handling
 	method = "history"
-	query = "channel=" + channel_id
-		
-	api_url = 'https://slack.com/api/{c}.{m}?token={t}&pretty=1&{q}'.format(c=channel, m=method, t=token, q=query)
 
-	response = requests.get(api_url)
-	json_data = response.json()
+	latest = 'now'
 
-	for message in json_data['messages']:
-		text = message['text']
-		searchObject = re.search("<(https:\/\/[^\s]+)>", text) #|<(http:\/\/[^\s]+\|)
+	while latest is not None:
+		if latest == 'now':
+			query = "channel=%s" % (channel_id)
+		else:
+			query = "channel=%s&latest=%s" % (channel_id, latest)
 
-		if searchObject:
-			URL = searchObject.group()[1:-1]
+		api_url = 'https://slack.com/api/{c}.{m}?token={t}&pretty=1&{q}'.format(c=channel_type, m=method, t=token, q=query)
+		print(api_url)
 
-			if URL in results:
-				if message['ts'] > results[URL]:
+		response = requests.get(api_url)
+		json_data = response.json()
+
+		for message in json_data['messages']:
+			text = message['text']
+			searchObject = re.search("<(https:\/\/[^\s]+)>", text) #|<(http:\/\/[^\s]+\|)
+
+			if searchObject:
+				URL = searchObject.group()[1:-1]
+
+				if URL in results:
+					if message['ts'] > results[URL]:
+						results[URL] = message['ts']
+				else:
 					results[URL] = message['ts']
-			else:
-				results[URL] = message['ts']
 
-	for result in results:
-		output += result + ", " + results[result] + "\n"
-
-	write_file(filepath, filename, output)
+		if not json_data['has_more']:
+			latest = None
+		else:
+			latest = str(min([float(x['ts']) for x in json_data['messages']]))
 
 def write_file(path, name, output):
 	try:
-		file = open(path + "\\" + name,"w", encoding="UTF-8")
-		file.write(output)
-		file.close()
-		
+		with open(os.path.join(path, name),"w", encoding="UTF-8") as file:
+			file.write(output)
+
 		return True
 	except IOError:
 		return False
