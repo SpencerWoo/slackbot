@@ -1,17 +1,17 @@
 var fs = require('fs');
 var path = require('path');
+var config = require('../config');
+var extract_text = require('../extract_text/extract_text');
 
-var json_path = path.join(__dirname, '..', 'scripts', 'logs');
-var file_name = 'links.txt'
-var file_path = json_path + "\\" + file_name
+var file_path = config.searchInputFile;
 
 module.exports = function (robot) {
 	robot.hear(
-		/https:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/i,
+		/https?:\/\/[\S]*/i,
 		(res) => {
 			var timestamp = (new Date().getTime() / 1000);
 			var value = res.match[0] + ", " + timestamp.toString() + "\n";
-			
+
 			appendFile(file_path, value);
 		}
 	);

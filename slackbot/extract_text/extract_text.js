@@ -15,7 +15,7 @@ assert(config.searchOutputFile);
 
 let searchURLs = new Set();
 
-var logger = bunyan.createLogger({
+const logger = bunyan.createLogger({
 	name: 'metadata',
 	streams: [{
 		path: config.searchOutputFile
@@ -79,6 +79,9 @@ const requestContent = (location, timestamp) => {
 	if (searchURLs.has(location)) {
 		return;
 	}
+
+	location = location.trim();
+	timestamp = timestamp.trim();
 
 	searchURLs.add(location);
 
