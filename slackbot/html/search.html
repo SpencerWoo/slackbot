@@ -1,0 +1,128 @@
+<html>
+<head>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</head>
+
+<body>
+<div class="container" role="main">
+
+<ul class="nav nav-pills">
+  <li role="presentation" class="active"><a href="#">All</a></li>
+  <li role="presentation"><a href="#">Grow</a></li>
+  <li role="presentation"><a href="#">Loop</a></li>
+  <li role="presentation"><a href="#">Other</a></li>
+</ul>
+
+<div id="summary">&nbsp;</div>
+</div>
+</body>
+
+<script>
+var request = new XMLHttpRequest();
+var requestURL = 'search.json';
+
+var locations = [];
+
+function rebuildTable(e) {
+	if (e) {
+		var target = e.target;
+
+		jQuery('.nav li').removeClass('active');
+		jQuery(target).parent().addClass('active');
+	}
+
+	var selectedTab = jQuery('.nav li.active').text();
+
+	var summary = document.getElementById('summary');
+	summary.innerHTML = '';
+
+	var table = document.createElement('table');
+	table.className = 'table';
+	summary.appendChild(table);
+	var tableBody = document.createElement('tbody');
+	table.appendChild(tableBody);
+	table = tableBody;
+
+	var addRow = function(isHeader, rowData) {
+		var row = document.createElement('tr');
+
+		for (var i = 0; i < rowData.length; i++) {
+			var cell = document.createElement(isHeader ? 'th' : 'td');
+			cell.innerHTML = rowData[i];
+			row.appendChild(cell);
+		}
+
+		table.appendChild(row);
+	};
+
+	addRow(true, ['Timestamp', 'URL', 'Title']);
+
+	var getRowData = function(locationMetadata) {
+		return [locationMetadata['timestamp'], '<a href="' + locationMetadata['location'] + '">' + locationMetadata['location'] + '</a>', locationMetadata['title']];
+	};
+
+	var isSelected = function(x) {
+		var location = x['location'];
+		var isGrow = location.indexOf('http://grow.liferay.com/') == 0 || location.indexOf('https://grow.liferay.com/') == 0;
+		var isLoop = location.indexOf('http://loop.liferay.com/') == 0 || location.indexOf('https://loop.liferay.com/') == 0;
+		var isOther = !isGrow && !isLoop;
+
+		if (selectedTab == 'Grow') {
+			return isGrow;
+		}
+		if (selectedTab == 'Loop') {
+			return isLoop;
+		}
+		if (selectedTab == 'Other') {
+			return isOther;
+		}
+		return true;
+	}
+
+	locations.filter(isSelected).map(getRowData).forEach(addRow.bind(null, false));
+};
+
+request.onreadystatechange = function() {
+	if (this.readyState == 4 && this.status == 200) {
+		var lines = this.responseText.split('\n');
+
+		for (var i = 0; i < lines.length; i++) {
+			var line = lines[i].trim();
+
+			if (!line) {
+				continue;
+			}
+
+			var locationMetadata = JSON.parse(line);
+
+			var milliseconds = parseFloat(locationMetadata['timestamp']) * 1000;
+			locationMetadata['timestamp'] = new Date(milliseconds);
+			locations.push(locationMetadata);
+		}
+
+		locations.reverse();
+
+		locations.sort(function(a, b) {
+			return b.timestamp.getTime() - a.timestamp.getTime();
+		});
+
+		rebuildTable();
+	}
+};
+
+request.open('GET', requestURL, true);
+request.send();
+
+jQuery('.nav li').on('click', rebuildTable);
+
+</script>
+
+</html>
