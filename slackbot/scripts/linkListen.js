@@ -1,14 +1,18 @@
 var fs = require('fs');
-var filepath = "C:\\Users\\liferay\\Desktop\\me\\slackbot\\slackbot\\scripts\\logs\\links.txt";
+var path = require('path');
 
-// https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
+var json_path = path.join(__dirname, '..', 'scripts', 'logs');
+var file_name = 'links.txt'
+var file_path = json_path + "\\" + file_name
+
 module.exports = function (robot) {
 	robot.hear(
 		/https:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/i,
 		(res) => {
 			var timestamp = (new Date().getTime() / 1000);
 			var value = res.match[0] + ", " + timestamp.toString() + "\n";
-			appendFile(filepath, value);
+			
+			appendFile(file_path, value);
 		}
 	);
 }

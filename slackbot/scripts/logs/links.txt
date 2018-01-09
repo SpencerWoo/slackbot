@@ -8,3 +8,5 @@ https://grow.liferay.com, 1515446262.000030
 https://loop.liferay.com/web/guest/home/-/loop/locations/_NA/pages/allPages/8485452, 1515442672.000420
 https://grow.liferay.com/people/TS+Journey+for+Minhchau+Dang, 1515441154.000072
 https://www.hotmail.com/, 1515441107.000728
+https://forms.liferay.com, 1515458289.101
+https://forms.liferay.com, 1515458360.46
