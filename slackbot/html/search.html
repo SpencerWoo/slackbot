@@ -9,6 +9,10 @@
 <!-- Latest compiled and minified JavaScript -->
 <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<!-- Moment.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
+<style>.table>tbody>tr>th { padding-top: 2em; }</style>
 </head>
 
 <body>
@@ -30,6 +34,7 @@ var request = new XMLHttpRequest();
 var requestURL = 'search.json';
 
 var locations = [];
+var timestampIndex = 0;
 
 function rebuildTable(e) {
 	if (e) {
@@ -51,19 +56,36 @@ function rebuildTable(e) {
 	table.appendChild(tableBody);
 	table = tableBody;
 
-	var addRow = function(isHeader, rowData) {
+	var lastRowDateString = null;
+
+	var addRow = function(isHeader, rowData, index) {
+		if (!isHeader) {
+			var rowDateString = moment(rowData[timestampIndex]).format('dddd, MMMM D, YYYY');
+
+			if (lastRowDateString != rowDateString) {
+				var divider = document.createElement('tr');
+
+				var cell = document.createElement('th');
+				cell.colSpan = rowData.length;
+				cell.innerHTML = rowDateString;
+
+				divider.appendChild(cell);
+				table.appendChild(divider);
+
+				lastRowDateString = rowDateString;
+			}
+		}
+
 		var row = document.createElement('tr');
 
 		for (var i = 0; i < rowData.length; i++) {
 			var cell = document.createElement(isHeader ? 'th' : 'td');
-			cell.innerHTML = rowData[i];
+			cell.innerHTML = (!isHeader && (i == timestampIndex)) ? moment(rowData[i]).format('HH:mm') : rowData[i];
 			row.appendChild(cell);
 		}
 
 		table.appendChild(row);
 	};
-
-	addRow(true, ['Timestamp', 'URL', 'Title']);
 
 	var getRowData = function(locationMetadata) {
 		return [locationMetadata['timestamp'], '<a href="' + locationMetadata['location'] + '">' + locationMetadata['location'] + '</a>', locationMetadata['title']];
