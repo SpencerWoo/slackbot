@@ -31,7 +31,7 @@
 
 <script>
 var request = new XMLHttpRequest();
-var requestURL = 'search.json';
+var requestURL = 'search.json?_=' + new Date().getTime();
 
 var locations = [];
 var timestampIndex = 0;
