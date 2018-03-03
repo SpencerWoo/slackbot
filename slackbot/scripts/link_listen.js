@@ -13,7 +13,7 @@ module.exports = function (robot) {
 			var timestamp = (new Date().getTime() / 1000);
 			var value = res.match[0] + ", " + timestamp.toString() + "\n";
 
-			appendFile(file_path, value);
+			append_file(file_path, value);
 		}
 	);
 
@@ -25,7 +25,7 @@ module.exports = function (robot) {
 	);
 }
 
-function appendFile(file, string){
+function append_file(file, string){
 	fs.appendFile(file, string, function (err) {
 		if (err) throw err;
 	});
