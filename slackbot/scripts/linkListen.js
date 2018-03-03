@@ -4,6 +4,7 @@ var config = require('../config');
 var extract_text = require('../extract_text/extract_text');
 
 var file_path = config.searchInputFile;
+var url = "http://"
 
 module.exports = function (robot) {
 	robot.hear(
@@ -13,6 +14,13 @@ module.exports = function (robot) {
 			var value = res.match[0] + ", " + timestamp.toString() + "\n";
 
 			appendFile(file_path, value);
+		}
+	);
+
+	robot.respond(
+		/!slackbot/i, 
+		(res) => {
+			res.reply(url);
 		}
 	);
 }
